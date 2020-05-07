@@ -1,0 +1,46 @@
+﻿  main.cpp
+F:\DesktopFolders\School\CS5201\Final\Final\Poisson.cpp(27,18): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+F:\DesktopFolders\School\CS5201\Final\Final\Poisson.cpp(129,9): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(168,9): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(239,9): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(558,18): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(393,13): warning C4101: 'm': unreferenced local variable
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(220): message : see reference to function template instantiation 'vector<T> jacobiSolver<double>(matrix<T>,vector<T>)' being compiled
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(521,16): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(224): message : see reference to function template instantiation 'vector<T> gaussseidelSolver<double>(compactmatrix<T>,vector<T>)' being compiled
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(528,18): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(529,18): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(865,16): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(706): message : see reference to function template instantiation 'void Cholesky_Decomposition<double>(const compactmatrix<double> &,matrix<double> &)' being compiled
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(159): message : see reference to function template instantiation 'vector<T> LLsolver<double>(compactmatrix<T>,vector<T>)' being compiled
+          with
+          [
+              T=double
+          ]
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(833,13): warning C4101: 'k': unreferenced local variable
+F:\DesktopFolders\School\CS5201\Final\Final\main.cpp(833,7): warning C4101: 'i': unreferenced local variable
+  Final.vcxproj -> F:\DesktopFolders\School\CS5201\Final\Final\Debug\Final.exe

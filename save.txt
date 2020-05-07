@@ -1,0 +1,719 @@
+
+
+void test()
+{
+
+  string filetoparse = "output.txt";
+  matrix<bool> silhouette = retrieve(filetoparse);
+  /*
+  matrix<bool> silhouette(20, 20);
+
+  for (int i = 0; i < silhouette.rows(); i++)
+  {
+    for (int j = 0; j < silhouette.cols(); j++)
+    {
+      silhouette(i, j) = true;
+    }
+  }
+
+  cout << silhouette << endl;*/
+  matrix<double>  a = createPoissonAMatrix(silhouette);
+  compactmatrix<double> ac(a);
+  //create
+
+  matrix<double> l(a.rows(), a.cols());
+  int size = silhouette.rows();
+
+  for (int i = 0; i < a.rows(); i++)
+  {
+    for (int j = 0; j < a.cols(); j++)
+    {
+      l(i, j) = 0;
+    }
+  }
+
+  //Cholesky_Decomposition(a, l);
+  //cout << endl;
+  //Cholesky_Decomposition( l,ac);
+
+  vector<double> b(a.rows());
+  for (int i = 0; i < a.rows(); i++)
+  {
+    b[i] = 0.1;
+  }
+  //---------------
+  //matrix<double> a = { {1,1,-1},{1,-2,3},{2,3,1} };
+  //vector<double> b = { 4,-6,7 };
+  //cout<<LUsolver(a, b)<<endl;
+  vector<double> answer = LLsolver(a, b);
+
+  string fileHeatMap = "heat.csv";
+  std::ofstream fout(fileHeatMap);
+
+  //int rows = 100;
+  //int cols = 100;
+  int rows = silhouette.rows();
+  int cols = silhouette.cols();
+  int n = std::sqrt(rows * cols);
+
+  for (int i = 0; i < rows * cols; i++)
+  {
+    if (i % cols == 0 && i != 0)
+    {
+      fout << "\n";
+    }
+    fout << answer[i];
+
+    if (i != ((rows * cols) - 1))
+    {
+      fout << ",";
+    }
+
+
+  }
+
+}
+void driver()
+{
+  string filetoparse = "output.txt";
+  //matrix<bool> silhouette = retrieve(filetoparse);
+  
+  matrix<bool> silhouette(20, 20);
+  for (int i = 0; i < silhouette.rows(); i++)
+  {
+    for (int j = 0; j < silhouette.cols(); j++)
+    {
+      silhouette(i, j) = true;
+    }
+  }
+  cout << silhouette << endl;
+  //matrix<double>  a=createPoissonAMatrix(silhouette);
+  matrix<double>  a=createPoissonAMatrix(silhouette);
+  //cout << a;
+  compactmatrix<double> ac(a);
+  //cout << ac;
+  //cout << a;
+  vector<double> b(a.rows());
+  for (int i = 0; i < a.rows(); i++)
+  {
+    b[i] = 0.1;
+  }
+
+  vector<double> answer;
+  int method = 0;
+
+  switch (method)
+  {
+    case 0:
+      answer = jacobiSolver(ac, b);
+      //answer = jacobiSolver(a, b);
+      break;
+    case 1:
+      answer = gaussseidelSolver(a, b);
+      break;
+    case 2:
+      answer = LUsolver<double>(a, b);
+      break;
+  };
+
+
+  string fileHeatMap = "heat.csv";
+  std::ofstream fout(fileHeatMap);
+
+  //int rows = 100;
+  //int cols = 100;
+  int rows = silhouette.rows();
+  int cols = silhouette.cols();
+  int n = std::sqrt(rows * cols);
+
+  for (int i = 0; i < rows*cols; i++)
+  {
+    if (i%cols==0 && i!=0)
+    {
+      fout << "\n";
+    }
+    fout << answer[i];
+
+    if (i != ((rows * cols) - 1))
+    {
+      fout << ",";
+    }
+
+    
+  }
+
+  cout << answer;
+}
+
+matrix<bool> retrieve(string textfile)
+{
+  std::ifstream finput("output.txt");
+
+  string temp_input;
+  int numlines = 0;
+  std::getline(finput, temp_input);
+  //run until non empty line has been found.
+  while (temp_input.length() == 0)
+  {
+    std::getline(finput, temp_input);
+  }
+  vector<string> temp_vector;
+
+  //Get coloumn of string
+  std::istringstream tokenStream(temp_input);
+  std::istream_iterator<char> eos;              // end-of-stream iterator
+  std::istream_iterator<char> iit(tokenStream);   // stdin iterator
+  int input_coloumn = 0;
+  while (iit != eos)
+  {
+    input_coloumn++;
+    ++iit;
+  }
+  //-----------------
+
+  while (temp_input.length() != 0)
+  {
+    numlines++;
+    temp_vector.resize(numlines);
+    temp_vector[numlines - 1] = temp_input;
+    std::getline(finput, temp_input);
+  }
+
+  matrix <bool> new_m(numlines, input_coloumn);
+
+  for (int i = 0; i < numlines; i++)
+  {
+    tokenStream = std::istringstream(temp_vector[i]);//reset stream
+    iit = std::istream_iterator<char>(tokenStream);
+    for (int j = 0; j < input_coloumn; j++)
+    {
+      if (*iit == 'B')
+      {
+        new_m(i, j) = true;
+      }
+      else
+      {
+        new_m(i, j) = false;
+      }
+
+      ++iit;
+    }
+  }
+  finput.close();
+  return new_m;
+}
+template<typename T>
+vector<T> jacobiSolver(compactmatrix<T> a, vector<T> b)
+{
+  int i, j, m, nValue;
+  vector<double> x(b.size()), c(b.size());
+  vector<double> x_previous(b.size());
+  nValue = b.size(); //value of n
+
+  for (int i = 0; i < b.size(); i++)
+  {
+    c[i] = b[i];
+    x[i] = 0;
+    x_previous[i] = 0;
+  }
+  //int b[3] = { 4,-6,7 };
+  double error = 100;
+  int iteration = 1;
+  while (error >= 0.02)
+  {
+    //cout << "iteration: " << iteration << endl;
+    iteration++;
+    //go through all values of a
+    //for (int index = 0; index < a.size(); index++)
+    //--------------------------ITERATION
+    int index = 0;
+    int row = 0;
+    int rowsize = a.rowsize;
+    while(row < rowsize)
+    {
+      int index_rowstart = a.rowindex(row);
+      int index_end = a.rowindex(row + 1);
+      i = a.row(index);
+      j = a.col(index);
+      c[i] = b[i];
+
+      while (index != index_end)
+      {
+        //cout << i << ":" << j << endl;
+        if (i != j)
+        {
+          c[i] = c[i] - a.value(index) * x[j];
+        }
+        index++;
+        if (index >= a.size())
+        {
+          break;
+        }
+        i = a.row(index);
+        j = a.col(index);
+      }
+
+      //cout << endl << endl << endl;
+      //cout << endl << i << ":" << j << endl;
+      row++;
+    }
+    //--------------------------ITERATION
+
+    /*
+    for (i = 0; i < nValue; i++) {
+      c[i] = b[i];
+      for (j = 0; j < nValue; j++) 
+      {
+        if (i != j) 
+        {
+          c[i] = c[i] - asub(i, j) * x[j];
+        }
+      }
+    }*/
+    /*
+    for (int index = 0; index < a.size(); index++)
+    {
+      i = a.row(index);
+      j = a.col(index);
+      if (i == j)
+      {
+        x[i] = c[i] / a.value(index);
+      }
+    }*/
+
+    for (int index = 0; index < a.rowsize; index++)
+    {
+      x[index] = c[index] / a.diag(index);
+    }
+
+    //error
+    for (int i = 0; i < x.size(); i++)
+    {
+      error += std::abs(x[i] - x_previous[i]);
+    }
+    error /= x.size();
+    //cout << "error: " << error << endl;
+    x_previous = x;
+  }
+  return x;
+}
+
+
+template<typename T>
+vector<T> jacobiSolver(matrix<T> a, vector<T> b)
+{
+  int i, j, m, nValue;
+  vector<double> x(b.size()), c(b.size());
+  vector<double> x_previous(b.size());
+  nValue = b.size(); //value of n
+
+  for (int i = 0; i < b.size(); i++)
+  {
+    c[i] = 0;
+    x[i] = 0;
+    x_previous[i] = 0;
+  }
+  //int b[3] = { 4,-6,7 };
+  double error = 100;
+  int iteration = 1;
+  while (error >= 0.02)
+  {
+    cout << "iteration: " << iteration << endl;
+    iteration++;
+    for (i = 0; i < nValue; i++) 
+    {
+      c[i] = b[i];
+      //cout << "before c[" << i << "]: " << c[i] << endl;
+      for (j = 0; j < nValue; j++) 
+      {
+        if (i != j) 
+        {
+          c[i] = c[i] - a(i, j) * x[j];
+        }
+      }
+      //cout << "after c[" << i << "]: " << c[i]<<endl;
+    }
+    for (i = 0; i < nValue; i++) {
+      x[i] = c[i] / a(i, i);
+    }
+    //error
+    for (int i = 0; i < x.size(); i++)
+    {
+      error += std::abs(x[i] - x_previous[i]);
+    }
+    error /= x.size();
+    cout << "error: " << error << endl;
+    x_previous = x;
+  }
+
+  return x;
+}
+
+
+
+template<typename T>
+vector<T> gaussseidelSolver(matrix<T> a, vector<T> b)
+{
+  int i, j, nValue;
+  vector<double> m(b.size()), n(b.size());
+  vector<double> x_previous(b.size());
+  nValue = b.size(); //value of n
+
+  for (int i = 0; i < b.size(); i++)
+  {
+    m[i] = 0;
+    n[i] = 0;
+    x_previous[i] = 0;
+  }
+
+  double error = 100;
+  int iteration = 1;
+  while (error >= 0.02) //p is size
+  {
+    cout << "iteration: " << iteration << endl;
+    iteration++;
+
+    for (i = 0; i < nValue; i++) {
+      n[i] = (b[i] / a(i,i));
+      for (j = 0; j < nValue; j++) {
+        if (j == i)
+          continue;
+        n[i] = n[i] - ((a(i,j) / a(i,i)) * m[j]);
+        m[i] = n[i];
+      }
+      //cout << "x" << i + 1 << "=" << n[i] << " ";
+    }
+    //cout << "\n";
+
+    //error
+
+    for (int i = 0; i < m.size(); i++)
+    {
+      error += std::abs(m[i] - x_previous[i]);
+    }
+    error /= m.size();
+    cout << "error: " << error << endl;
+    x_previous = m;
+  }
+  return n;
+}
+
+matrix<double> createPoissonAMatrix(matrix<bool> givenMatrix)
+{
+  int n;
+  int rows = givenMatrix.rows();
+  int cols = givenMatrix.cols();
+  if (rows != cols)
+  {
+    n = std::sqrt(rows * cols);
+  }
+  else
+  {
+    n = rows;
+  }
+  //int size = std::pow((n - 1), 2);
+  int size = rows*cols;
+  double adjacentValue = -0.25;
+  double iValue = 1.0;
+  matrix<double> mat(size, size);
+
+  for (int i = 0; i < size; i++)
+  {
+    for (int j = 0; j < size; j++) //check diag
+    {
+      if (j == i)
+      {
+        mat(i, j) = iValue;
+      }
+      else
+      {
+        mat(i, j) = 0.0;
+      }
+    }
+  }
+
+  //updownleftright
+  int ydir[4] = {1,-1,0, 0};
+  int xdir[4] = {0, 0,-1,1} ;
+  auto canplace = [=](int&& x, int&& y)
+  {
+    //isnotoutofBounds
+    bool result= (x < 0 || x > cols-1 || y<0 || y>rows-1) ? false : true;
+    
+    if (result)
+    {
+      bool hasnoKnownValue = (givenMatrix(y, x) != 0) ? true : false;
+      //if has known value put it to bool
+      return hasnoKnownValue;
+    }
+    //cout << "\nResult: " << x << "|" << y << "|" << result;
+    return result;
+  };
+
+  int matrow = 0;
+  for (int i = 0; i < rows; i++)
+  {
+    for (int j = 0; j < cols; j++) //check diag
+    {
+      //up
+      if (canplace(xdir[0] + j, ydir[0] + i))
+      {
+        mat(matrow, matrow+(cols)) = adjacentValue;
+      }
+      //down
+      if (canplace(xdir[1] + j, ydir[1] + i))
+      {
+        mat(matrow, matrow - (cols) ) = adjacentValue;
+      }
+      //left
+      if (canplace(xdir[2] + j, ydir[2] + i))
+      {
+        mat(matrow, matrow - 1) = adjacentValue;
+      }
+      //right
+      if (canplace(xdir[3] + j, ydir[3] + i))
+      {
+        mat(matrow, matrow + 1) = adjacentValue;
+      }
+      matrow++;
+    }
+  }
+  return mat;
+}
+
+template<typename T>
+vector<T> LLsolver(matrix<T> a, vector<T> b)
+{
+  matrix<T> l(a.rows(), a.cols());
+  int size = a.rows();
+
+  for (int i = 0; i < a.rows(); i++)
+  {
+    int size = a.rows();
+    for (int j = 0; j < a.cols(); j++)
+    {
+      l(i, j) = 0;
+    }
+  }
+  Cholesky_Decomposition(a, l);
+
+  matrix<T> lt = l.transpose();
+  vector<T> f(size);
+  vector<T> final(size);
+  for (int i = 0; i < size; i++)
+  {
+    f[i] = 0;
+    final[i] = 0;
+  }
+  //forward
+  for (int i = 0; i < size; i++)
+  {
+    double s = 0;
+    for (int j = 0; j < i; j++)
+    {
+      s = s + l(i, j) * f[j];
+    }
+    f[i] = (b[i] - s) / l(i, i);
+  }
+  //cout << "\nF:\n" << f;
+  //backward
+  for (int i = size - 1; i >= 0; i--) //ltranspose
+  {
+    double s = 0;
+    for (int j = size - 1; j >= i; j--)
+    {
+      s = s + lt(i, j) * final[j];
+    }
+    final[i] = (f[i] - s) / lt(i, i);
+  }
+  //cout << "\nfinal:\n" << final;
+  return final;
+}
+
+template<typename T>
+vector<T> LUsolver(matrix<T> a, vector<T> b)
+{
+  //matrix<double> a = { {1,1,-1},{1,-2,3},{2,3,1} };
+  matrix<T> l(a.rows(), a.cols());
+  matrix<T> u(a.rows(), a.cols());
+  //vector<double> b = { 4,-6,7 };
+  int size = a.rows();  
+
+  for (int i=0; i < a.rows(); i++)
+  {
+    int size = a.rows();
+    for (int j=0; j < a.cols(); j++)
+    {
+      l(i, j) = 0;
+    }
+  }
+  LUdecomposition(a,l,u);
+  
+  vector<T> f(size);
+  vector<T> final(size);
+  for (int i = 0; i < size; i++)
+  {
+    f[i] = 0;
+    final[i] = 0;
+  }
+  //forward
+  for (int i = 0; i < size; i++) 
+  {
+    double s = 0;
+    for (int j = 0; j < i; j++) 
+    {
+        s = s + l(i,j) * f[j];
+    }
+    f[i] = (b[i] - s) / l(i,i);
+  }
+  //cout << "\nF:\n" << f;
+  //backward
+  for (int i = size-1; i >=0 ; i--)
+  {
+    double s = 0;
+    for (int j = size-1; j >= i; j--)
+    {
+      s = s + u(i, j) * final[j];
+    }
+    final[i] = (f[i] - s) / u(i, i);
+  }
+  //cout << "\nfinal:\n" << final;
+  return final;
+}
+template<typename T>
+void Cholesky_Decomposition(const matrix<T>& a, matrix<T>& lower)
+{
+
+  int n = a.rows();
+
+  for (int i = 0; i < n; ++i) {
+    for (int k = 0; k < i; ++k) {
+      T value = a(i, k);
+      for (int j = 0; j < k; ++j)
+        value -= lower(i, j) * lower(k, j);
+      lower(i, k) = value / lower(k, k);
+    }
+    T value = a(i, i);
+    for (size_t j = 0; j < i; ++j)
+      value -= lower(i, j) * lower(i, j);
+    lower(i, i) = std::sqrt(value);
+  }
+
+  // Displaying Lower Triangular and its Transpose 
+  //cout << lower;
+}
+
+template<typename T>
+void Cholesky_Decomposition(matrix<T>& lower, const compactmatrix<T>& a)
+{
+  int i, j,k;
+
+  int n = lower.rows();
+
+  int index = 0;
+  int size_m = a.size();
+  int row = 0;
+  int rowsize = a.rowsize;
+  while (row < rowsize)
+  {
+    int index_rowstart = a.rowindex(row);
+    int index_end = a.rowindex(row+1);
+    //int index_rowstart = index;
+    //int index_end; //= a.rowindex(row+1);
+    int i_initial = a.row(index);
+    i = i_initial;
+    k = a.col(index);
+    //iterate through this row
+    //FIRST PART
+    while (index != index_end)
+    {
+      //cout << i << ":" << j << endl;
+      //-----
+      if (!(k < i))
+      {
+        index++;
+        break;
+      }
+
+      //T value = a(i, k);
+      T value = a.value(index);
+      //loop again
+      for (j = 0; j < k; ++j)
+      {
+        value -= lower(i, j) * lower(k, j); //lower this later somehow
+      }
+
+      lower(i, k) = value / lower(k, k);
+
+      index++;
+      i = a.row(index);
+      k = a.col(index);
+    }
+    //FIRST PART END
+    //reset;
+    //index_end = index;
+    //2nd part
+    //T value = a(i, i); do this
+    T value=a.diag(row);
+    
+    /*
+    for (int current_index = index_rowstart; current_index < index_end; current_index++)
+    {
+      i = a(current_index, 0);
+      j = a(current_index, 1);
+      if (i == j)
+      {
+        value=a(current_index, 2);
+        break;
+      }
+    }*/
+    //-----
+    for (int j = 0; j < i; ++j)//go up to row
+    {
+      value -= lower(i, j) * lower(i, j);
+    }
+    lower(i, i) = std::sqrt(value);
+    row++;
+  }
+
+
+  // Displaying Lower Triangular and its Transpose 
+  cout << lower;
+}
+
+template<typename T>
+void LUdecomposition(const matrix<T>& a, matrix<T>& l, matrix<T>& u)
+{
+  int i = 0, j = 0, k = 0;
+  for (i = 0; i < a.rows(); i++) 
+  {
+    for (j = 0; j < a.rows(); j++)
+    {
+      if (j < i)
+      {
+
+        l(j,i) = 0;
+      }
+      else 
+      {
+        l(j,i) = a(j,i);
+        for (k = 0; k < i; k++) 
+        {
+          l(j, i) = l(j, i) - l(j, k) * u(k,i);
+        }
+      }
+    }
+    for (j = 0; j < a.rows(); j++) {
+      if (j < i)
+        u(i,j) = 0;
+      else if (j == i)
+        u(i,j) = 1;
+      else {
+        u(i,j) = a(i,j) / l(i,i);
+        for (k = 0; k < i; k++) {
+          u(i,j) = u(i,j) - ((l(i,k) * u(k,j)) / l(i,i));
+        }
+      }
+    }
+  }
+}
