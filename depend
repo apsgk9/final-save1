@@ -1,0 +1,13 @@
+cholesky.o: cholesky.cpp cholesky.h solverInterface.h matrix.h vector.h \
+ global.h vector.hpp matrix.hpp compactmatrix.h compactmatrix.hpp
+gaussseidel.o: gaussseidel.cpp gaussseidel.h solverInterface.h matrix.h \
+ vector.h global.h vector.hpp matrix.hpp compactmatrix.h \
+ compactmatrix.hpp
+global.o: global.cpp global.h
+jacobi.o: jacobi.cpp jacobi.h solverInterface.h matrix.h vector.h \
+ global.h vector.hpp matrix.hpp compactmatrix.h compactmatrix.hpp
+main.o: main.cpp matrix.h vector.h global.h vector.hpp matrix.hpp \
+ compactmatrix.h compactmatrix.hpp Poisson.h solverInterface.h jacobi.h \
+ cholesky.h gaussseidel.h
+Poisson.o: Poisson.cpp Poisson.h matrix.h vector.h global.h vector.hpp \
+ matrix.hpp solverInterface.h compactmatrix.h compactmatrix.hpp
