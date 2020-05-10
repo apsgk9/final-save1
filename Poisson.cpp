@@ -4,14 +4,14 @@
 Poisson::Poisson(const string input_file, const string output_file, double forcing_function) :
 file_input(input_file), file_output(output_file), image(retrieve(file_input)),
 A(createPoissonAMatrix(image)), compact_A(A),
-b(createBvector(forcing_function))
+b(createBvector(forcing_function,A.rows()))
 {}
 
 
-vector<double> Poisson::createBvector(double input_ff)
+vector<double> Poisson::createBvector(double input_ff,int size)
 {
-  vector<double> b_temp(A.rows());
-  for (int i = 0; i < A.rows(); i++)
+  vector<double> b_temp(size);
+  for (int i = 0; i < size; i++)
   {
     b_temp[i] = input_ff;
   }
@@ -22,17 +22,7 @@ matrix<double> Poisson::createPoissonAMatrix(matrix<bool> givenMatrix)
 {
   int rows = givenMatrix.rows();
   int cols = givenMatrix.cols();
-  /*
-  int n;
-  if (rows != cols)
-  {
-    n = std::sqrt(rows * cols);
-  }
-  else
-  {
-    n = rows;
-  }*/
-  //int size = std::pow((n - 1), 2);
+
   int size = rows * cols;
   double adjacentValue = -0.25;
   double iValue = 1.0;
@@ -120,6 +110,10 @@ void Poisson::fastsolve(solverInterface<double>& s)
 
 void Poisson::printtofile(string file)
 {
+  if (answer.empty())
+  {
+    throw std::invalid_argument("Answer has not been found yet");
+  }
   //string fileHeatMap = "heat.csv";
   string fileHeatMap = file;
   std::ofstream fout(fileHeatMap);

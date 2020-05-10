@@ -54,7 +54,7 @@ public:
   * @pre T = T assingment operator must be defined
   * @post returns a b vector based on forcing function
   */
-  vector<double> createBvector(double input_ff);
+  static vector<double> createBvector(double input_ff,int size);
 
   /*!
   * @brief creates the A matrix based on image
@@ -62,7 +62,7 @@ public:
   * @pre T = T assingment operator must be defined
   * @post returns the A matrix based on image givenMatrix
   */
-  matrix<double> createPoissonAMatrix(matrix<bool> givenMatrix);
+  static matrix<double> createPoissonAMatrix(matrix<bool> givenMatrix);
   /*!
   * @brief solves Ax=b
   * @param[in] s solver to solve that outputs an answer from Ax=b
@@ -79,10 +79,23 @@ public:
   * @post prints out the results to file_output
   */
   void fastsolve(solverInterface<double>& s);
-  
-  void printtofile(string file);
 
-  matrix<bool> retrieve(string textfile);
+  /*!
+  * @brief prints to answer to file given
+  * @param[in] file file for the answer to be printed out 
+  * @pre answer must be solved first
+  * @post prints out the results to file
+  * @throw invalid_argument answer has not been found yet
+  */
+  void printtofile(string file);
+  /*!
+  * @brief creates b/w image from textfile
+  * @param[in] file file for the answer to be printed out
+  * @pre answer must be solved first
+  * @pre text file must contain 'W' And 'B" 
+  * @post creates matrix<bool> image from textfile
+  */
+  static matrix<bool> retrieve(string textfile);
 };
 //#include "Poisson.cpp"
 

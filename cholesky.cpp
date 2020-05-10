@@ -139,33 +139,41 @@ void cholesky::Cholesky_Decomposition(const matrix<double>& a, matrix<double>& l
   }
 
   int n = a.rows();
-
+  cout << "r: " << a.rows() << "||c: " << a.cols() << std::endl;
+  int O1value = 0;
+  int O2value = 0;
+  int O3value = 0;
+  int O4value = 0;
   for (int i = 0; i < n; ++i)
   {
+    O1value++;
     for (int k = 0; k < i; ++k)
     {
+      O2value++;
       double value = a(i, k);
       if (value != 0)
       {
-        //cout << "Value: " << value << "| " << i << " " << k << endl;
       }
       for (int j = 0; j < k; ++j)
       {
         value -= lower(i, j) * lower(k, j);
+        O3value++;
       }
       lower(i, k) = value / lower(k, k);
       if (value != 0)
       {
-        //cout << "lower(i, k): " << lower(i, k) << "| " << i << " " << k << endl;
       }
     }
-
     //cout << endl << endl << lower;
     double value = a(i, i);
     for (int j = 0; j < i; ++j)
+    {
       value -= lower(i, j) * lower(i, j);
+      O4value++;
+    }
     lower(i, i) = std::sqrt(value);
   }
+  cout <<"O1:" << O1value << " ||O2:" << O2value << " ||O2: " << O3value << " ||O4: " << O4value << std::endl;
 
   // Displaying Lower Triangular and its Transpose 
   //cout << lower;
@@ -183,41 +191,50 @@ void cholesky::Cholesky_Decomposition(const compactmatrix<double>& a, matrix<dou
   int index = -1;
   //int size_m = a.size();
   int row = 0;
+
   int rowsize = a.size_row();
-  //cout << endl << endl;
+  cout << "r: " << a.size_row() << "||c: " << a.size_col() << std::endl;
+  int O1value = 0;
+  int O2value = 0;
+  int O3value = 0;
+  int O4value = 0;
   while (row < rowsize)
   {
+    O1value++;
     int index_rowstart = a.rowindex(row);
     //int index_end = a.rowindex(row + 1);
     index = index_rowstart;
     //skips initial coloumns of zeros
     for (int k = a.col(index); k < row; ++k)
     {
+      O2value++;
       double value = 0;
       if (k == a.col(index))
       {
         value = a.value(index);
         index++;
-        //cout << "Value: " << value << "| " << row << " " << k << endl;
       }
       for (int j = 0; j < k; ++j)
       {
         value -= lower(row, j) * lower(k, j);
+        O3value++;
       }
       lower(row, k) = value / lower(k, k);
-      //cout << "lower(i, k): " << lower(row, k) << "| " << row << " " << k << endl;
     }
     //FIRST PART END
-    //2nd part
     //T value = a(i, i); do this
     double value = a.diag(row);
     for (int j = 0; j < row; ++j)
     {
       value -= lower(row, j) * lower(row, j);
+      O4value++;
     }
     lower(row, row) = std::sqrt(value);
     row++;
   }
+  cout << "O1:" << O1value << " ||O2:" << O2value << " ||O2: " << O3value << " ||O4: " << O4value << std::endl;
+
+
   // Displaying Lower Triangular and its Transpose 
   //cout << lower;
 }

@@ -127,6 +127,7 @@ int compactmatrix<T>::rowindex(int a)
 {
   return rowstarts[a];
 }
+
 template<typename T>
 T compactmatrix<T>::diag(int a)
 {

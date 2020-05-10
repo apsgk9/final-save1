@@ -21,14 +21,17 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-void driver2();
+void driver(string fin, string fout, double forcing_function, int method, int mode = 0);
 
 int main()
 {
-
   try
   {
-    driver2();
+    string fin= "output.txt";
+    string fout= "heat.csv";
+    int method = 0;
+
+    driver(fin, fout,1.0,method);
   }
   catch (const std::out_of_range & oor) {
     std::cerr << "\nOut of Range error: " << oor.what() << '\n';
@@ -49,25 +52,79 @@ int main()
   {
     std::cerr << "An unknown error has occured." << '\n';
   }
-
   return 0;
 }
 
-void driver2()
+void driver(string fin,string fout,double forcing_function,int method,int mode)
 {
-  string fin= "output.txt";
-  string fout= "heat.csv";
-  string fout2 = "heat2.csv";
-  Poisson P2D(fin,fout,0.01);
-  Poisson P2D2(fin, fout2, 0.01);
-  //Poisson<double> P2D;
-  jacobi j(0.002);
-  cholesky c;
-  gaussseidel g(0.001);
-  //cout << "gaussseidel\n";
-  P2D.fastsolve(g);
-  cout << "\njacobi\n";
-  P2D2.fastsolve(j);
+  Poisson P2D(fin,fout, forcing_function);
+  string ask = "Error convergence difference stop criteria: ";
+  double error;
+  if (mode==0)
+  {
+    cout << "Using Normal Matrix" << endl;
+    if (method == 0)
+    {
+      cout << "Method: Gauss-Seidel" << endl;
+      cout << ask;
+      cin >> error;
+      gaussseidel g(error);
+      P2D.fastsolve(g);
+    }
+    else if (method == 1)
+    {
+      cout << "Method: Jacobi" << endl;
+      cout << ask;
+      cin >> error;
+      jacobi j(error);
+      P2D.fastsolve(j);
+    }
+    else if (method == 2)
+    {
+      cout << "Method: Cholesky Factorization" << endl;
+      cholesky c;
+      P2D.fastsolve(c);
+    }
+    else
+    {
+      throw std::invalid_argument("cannot find method specified");
+    }
+  }
+  else if (mode==1)
+  {
+    cout << "Using Normal Matrix" << endl;
+    if (method == 0)
+    {
+      cout << "Method: Gauss-Seidel" << endl;
+      cout << ask;
+      cin >> error;
+      gaussseidel g(error);
+      P2D.solve(g);
+    }
+    else if (method == 1)
+    {
+      cout << "Method: Jacobi" << endl;
+      cout << ask;
+      cin >> error;
+      jacobi j(error);
+      P2D.solve(j);
+    }
+    else if (method == 2)
+    {
+      cout << "Method: Cholesky Factorization" << endl;
+      cholesky c;
+      P2D.solve(c);
+    }
+    else
+    {
+      throw std::invalid_argument("cannot find method specified");
+    }
+    
+  }
+  else
+  {
+    throw std::invalid_argument("mode input is invalid ");
+  }
 }
 
 

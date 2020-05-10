@@ -26,6 +26,7 @@ vector<double> gaussseidel::operator()(const matrix<double>& a,
   vector<double> x_previous(b.size());
   nValue = b.size(); //value of n
 
+
   for (int i = 0; i < b.size(); i++)
   {
     m[i] = 0;
@@ -33,16 +34,22 @@ vector<double> gaussseidel::operator()(const matrix<double>& a,
     x_previous[i] = 0;
   }
 
-  double error = 100;
-  //int iteration = 1;
-  while (error >= 0.02) //p is size
+  double error = error_threshold+1;
+  int iteration = 1;
+  int O1value = 0;
+  int O2value = 0;
+  while (error >= error_threshold) //p is size
   {
-    //cout << "iteration: " << iteration << endl;
-    //iteration++;
+    //cout << "iteration: " << iteration << std::endl;
+    iteration++;
 
-    for (i = 0; i < nValue; i++) {
+    for (i = 0; i < nValue; i++)
+    {
+      O1value++;
       x[i] = (b[i] / a(i, i));
-      for (j = 0; j < nValue; j++) {
+      for (j = 0; j < nValue; j++) 
+      {
+        O2value++;
         if (j != i)
         {
           x[i] = x[i] - ((a(i, j) / a(i, i)) * m[j]);
@@ -50,7 +57,6 @@ vector<double> gaussseidel::operator()(const matrix<double>& a,
         }
       }
     }
-
     //error
 
     for (int i = 0; i < x.size(); i++)
@@ -62,7 +68,7 @@ vector<double> gaussseidel::operator()(const matrix<double>& a,
     x_previous = x;
   }
 
-  //cout << "iterations: " << iteration << std::endl;
+  cout << "iterations: " << iteration << std::endl;
   return x;
 }
 
@@ -88,21 +94,21 @@ vector<double> gaussseidel::operator()(const compactmatrix<double>& a, const vec
     x[i] = 0;
     x_previous[i] = 0;
   }
-  //int b[3] = { 4,-6,7 };
-  double error = 100;
-  //int iteration = 1;
-  while (error >= 0.02)
+  double error = error_threshold+1;
+  int iteration = 1;
+  int O1value = 0;
+  int O2value = 0;
+  while (error >= error_threshold)
   {
-    //cout << "iteration: " << iteration << endl;
-    //iteration++;
+    iteration++;
     //go through all values of a
-    //for (int index = 0; index < a.size(); index++)
     //--------------------------ITERATION
     int index = 0;
     int row = 0;
     int rowsize = a.size_row();
     while (row < rowsize)
     {
+      O1value++;
       //int index_rowstart = a.rowindex(row);
       int index_end = a.rowindex(row + 1);
       i = a.row(index);
@@ -111,7 +117,7 @@ vector<double> gaussseidel::operator()(const compactmatrix<double>& a, const vec
       while (index != index_end && index < a.size())
       {
         //cout << i << ":" << j << endl;
-
+        O2value++;
         i = a.row(index);
         j = a.col(index);
         if (i != j)
@@ -132,6 +138,7 @@ vector<double> gaussseidel::operator()(const compactmatrix<double>& a, const vec
     //cout << "error: " << error << endl;
     x_previous = x;
   }
-  //cout << "iterations: " << iteration << std::endl;
+  cout << "O1:" << O1value << " ||O2:" << O2value << std::endl;
+  cout << "iterations: " << iteration << std::endl;
   return x;
 }

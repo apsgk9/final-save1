@@ -37,16 +37,25 @@ vector<double> jacobi::operator()(const matrix<double>& a, const vector<double>&
   }
   double error = error_threshold+1;
   int iteration = 1;
+
+  //----------------------
+  int O1value = 0;
+  int O2value = 0;
+  int O3value = 0;
+  //----------------------
+
   while (error >= error_threshold)
   {
-    //cout << "iteration: " << iteration << endl;
+    cout << "iteration: " << iteration << std::endl;
     iteration++;
     for (i = 0; i < nValue; i++)
     {
+      O1value++;
       c[i] = b[i];
       //cout << "before c[" << i << "]: " << c[i] << endl;
       for (j = 0; j < nValue; j++)
       {
+        O2value++;
         if (i != j)
         {
           c[i] = c[i] - a(i, j) * x[j];
@@ -54,9 +63,12 @@ vector<double> jacobi::operator()(const matrix<double>& a, const vector<double>&
       }
       //cout << "after c[" << i << "]: " << c[i]<<endl;
     }
-    for (i = 0; i < nValue; i++) {
+    for (i = 0; i < nValue; i++) 
+    {
+      O3value++;
       x[i] = c[i] / a(i, i);
     }
+
     //error
     for (int i = 0; i < x.size(); i++)
     {
@@ -66,7 +78,8 @@ vector<double> jacobi::operator()(const matrix<double>& a, const vector<double>&
     //cout << "error: " << error << endl;
     x_previous = x;
   }
-  //cout << "iterations: " << iteration << std::endl;
+  cout << "O1:" << O1value << " ||O2:" << O2value << " ||O2: " << O3value <<  std::endl;
+  cout << "iterations: " << iteration << std::endl;
 
   return x;
 }
@@ -99,11 +112,15 @@ vector<double> jacobi::operator()(const compactmatrix<double>& a, const vector<d
   }
 
   double error = error_threshold+1;
-  //int iteration = 1;
+  int iteration = 1;
+  //----------------------
+  int O1value = 0;
+  int O2value = 0;
+  int O3value = 0;
+  //----------------------
   while (error >= error_threshold)
   {
-    //cout << "iteration: " << iteration << endl;
-    //iteration++;
+    iteration++;
     //go through all values of a
     //--------------------------ITERATION
     int index = 0;
@@ -111,6 +128,7 @@ vector<double> jacobi::operator()(const compactmatrix<double>& a, const vector<d
     int rowsize = a.size_row();
     while (row < rowsize)
     {
+      O1value++;
       //int index_rowstart = a.rowindex(row);
       int index_end = a.rowindex(row + 1);
       i = a.row(index);
@@ -119,7 +137,7 @@ vector<double> jacobi::operator()(const compactmatrix<double>& a, const vector<d
 
       while (index != index_end) //&& index < a.size())
       {
-        //cout << i << ":" << j << endl;
+        O2value++;
         i = a.row(index);
         j = a.col(index);
         if (i != j)
@@ -131,18 +149,15 @@ vector<double> jacobi::operator()(const compactmatrix<double>& a, const vector<d
         {
           break;
         }
-        //i = a.row(index);
-        //j = a.col(index);
       }
 
-      //cout << endl << endl << endl;
-      //cout << endl << i << ":" << j << endl;
       row++;
     }
 
     for (int index = 0; index < a.size_row(); index++)
     {
       x[index] = c[index] / a.diag(index);
+      O3value++;
     }
 
     //error
@@ -154,6 +169,7 @@ vector<double> jacobi::operator()(const compactmatrix<double>& a, const vector<d
     //cout << "error: " << error << endl;
     x_previous = x;
   }
-  //cout << "iterations: " << iteration << std::endl;
+  cout << "O1:" << O1value << " ||O2:" << O2value << " ||O2: " << O3value << std::endl;
+  cout << "iterations: " << iteration << std::endl;
   return x;
 }

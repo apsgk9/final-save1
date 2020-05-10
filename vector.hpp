@@ -427,3 +427,4 @@ vector<T>::vector(vector<T>&& otherVector)
   arr = otherVector.arr;
   otherVector.arr = nullptr;
 }
+

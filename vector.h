@@ -383,11 +383,17 @@ public:
   /*!
   * @brief  move constructor
   * @param[in]  otherVector
-  * @pre  
-  * @post 
+  * @pre  otherVector must have pass init() preconditions
+  * @post moves contents of otherVector to *this vector
+  * @post sets *this's pointers to nullptr
   */
 
   vector(vector<T>&& otherVector);
+
+
+
+
+
 };
 
 
